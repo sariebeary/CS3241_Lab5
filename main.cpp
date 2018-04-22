@@ -82,7 +82,7 @@ double Sphere::intersectWithRay(Ray r, Vector3& intersection, Vector3& normal)
 
 	double alpha = dot_prod(d, d); 
 	double beta = dot_prod(d * 2.0, (p - c));
-	double gamma = (p - c).lengthsqr - pow(r_, 2); 
+	double gamma = ((p - c).lengthsqr()) - pow(r_, 2); 
 	double det = pow(beta, 2) - (4 * alpha * gamma); // determinant
 	double t; 
 
@@ -109,12 +109,14 @@ double Sphere::intersectWithRay(Ray r, Vector3& intersection, Vector3& normal)
 		// negative root behind ray origin (consider no interection) 
 			return -1; 
 		}
+
 		// intersection
 		intersection = p + (d * t);
 
 		// normal
 		normal = (intersection - c);
 		normal.normalize();
+		return t; 
 	}
 	
 	// imaginary roots or 1 root(ray tangential to sphere so consider no intersection) 
