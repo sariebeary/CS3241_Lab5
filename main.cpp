@@ -158,6 +158,21 @@ void rayTrace(Ray ray, double& r, double& g, double& b, int fromObj = -1 ,int le
 				// Step 3
 				goBackGround = 0;
 
+				// diffuse reflection
+				lightV = (lightPos - intersection); // direction unit vector from surface point to light source  
+				lightV.normalize();
+				r += diffusetLight[0] * objList[i]->diffusetReflection[0] * dot_prod(normal, lightV);
+				g += diffusetLight[1] * objList[i]->diffusetReflection[1] * dot_prod(normal, lightV);
+				b += diffusetLight[2] * objList[i]->diffusetReflection[2] * dot_prod(normal, lightV);
+
+				// specular reflection 
+				lightReflectionV = normal * 2 * dot_prod(normal, lightV) - lightV; // reflection vector 2(N dot L) N - L
+				viewV = cameraPos - intersection; // direction unit vector from the surface point to viewer  
+				viewV.normalize(); 
+				r += specularLight[0] * objList[i]->specularReflection[0] * pow(dot_prod(lightReflectionV, viewV), objList[i]->speN);
+				g += specularLight[1] * objList[i]->specularReflection[1] * pow(dot_prod(lightReflectionV, viewV), objList[i]->speN);
+				b += specularLight[2] * objList[i]->specularReflection[2] * pow(dot_prod(lightReflectionV, viewV), objList[i]->speN);
+
 			}
 		}
 	}
