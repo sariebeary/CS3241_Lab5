@@ -2,7 +2,7 @@
   Generating code
   2 of 51 functions ( 3.9%) were compiled, the rest were copied from previous compilation.
     0 functions were new in current compilation
-    2 functions had inline decision re-evaluated but remain unchanged
+    1 functions had inline decision re-evaluated but remain unchanged
   Finished generating code
   Lab5 Ray Tracing.vcxproj -> C:\Users\e0270943\Documents\CS3241_Lab5\Release\Lab5 Ray Tracing.exe
   Lab5 Ray Tracing.vcxproj -> C:\Users\e0270943\Documents\CS3241_Lab5\Release\Lab5 Ray Tracing.pdb (Full PDB)
