@@ -127,6 +127,9 @@ double Sphere::intersectWithRay(Ray r, Vector3& intersection, Vector3& normal)
 void rayTrace(Ray ray, double& r, double& g, double& b, int fromObj = -1 ,int level = 0)
 {
 	// Step 4
+	if (level == MAX_RT_LEVEL) {
+		return;
+	}
 
 	int goBackGround = 1, i = 0;
 
@@ -140,14 +143,21 @@ void rayTrace(Ray ray, double& r, double& g, double& b, int fromObj = -1 ,int le
 	double mint = DBL_MAX, t;
 
 
-	//for (i = 0; i < NUM_OBJECTS; i++)
+	for (i = 0; i < NUM_OBJECTS; i++)
 	{
 		if ((t = objList[i]->intersectWithRay(ray, intersection, normal)) > 0)
 		{
-			r = g = b = 1.0; 			// Step 2 
+			r = g = b = 1.0; 			
+			if ((t < mint) && (fromObj != i)) {
+				mint = t;
+				// Step 2 
+				r = ambiantLight[0] * objList[i]->ambiantReflection[0];
+				g = ambiantLight[1] * objList[i]->ambiantReflection[1];
+				b = ambiantLight[2] * objList[i]->ambiantReflection[2];
 
-			// Step 3
-			goBackGround = 0;
+				// Step 3
+				goBackGround = 0;
+			}
 		}
 	}
 
