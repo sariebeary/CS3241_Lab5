@@ -131,7 +131,7 @@ void rayTrace(Ray ray, double& r, double& g, double& b, int fromObj = -1 ,int le
 		return;
 	}
 
-	int goBackGround = 1, i = 0;
+	int goBackGround = 1, i = 0, j = 0;
 
 	Vector3 intersection, normal;
 	Vector3 lightV;
@@ -141,6 +141,7 @@ void rayTrace(Ray ray, double& r, double& g, double& b, int fromObj = -1 ,int le
 
 	Ray newRay;
 	double mint = DBL_MAX, t;
+	bool shadow = false; 
 
 
 	for (i = 0; i < NUM_OBJECTS; i++)
@@ -148,6 +149,7 @@ void rayTrace(Ray ray, double& r, double& g, double& b, int fromObj = -1 ,int le
 		if ((t = objList[i]->intersectWithRay(ray, intersection, normal)) > 0)
 		{
 			//r = g = b = 1.0; 			
+			// a ray will not hit objects where it rebounds froms 
 			if ((t < mint) && (fromObj != i)) {
 				mint = t;
 				// Step 2 
@@ -157,22 +159,48 @@ void rayTrace(Ray ray, double& r, double& g, double& b, int fromObj = -1 ,int le
 
 				// Step 3
 				goBackGround = 0;
+				// check shadow ray from each surface point to each light source 
+				Ray shadowRay;
+				shadowRay.start = intersection;
+				shadowRay.dir = lightV; 
 
-				// diffuse reflection
-				lightV = (lightPos - intersection); // direction unit vector from surface point to light source  
-				lightV.normalize();
-				r += diffusetLight[0] * objList[i]->diffusetReflection[0] * dot_prod(normal, lightV);
-				g += diffusetLight[1] * objList[i]->diffusetReflection[1] * dot_prod(normal, lightV);
-				b += diffusetLight[2] * objList[i]->diffusetReflection[2] * dot_prod(normal, lightV);
+				for (j = 0; j < NUM_OBJECTS; j++)
+				{
+					// if hit nothing but light source, PIE 
+					if ((i != j) && (t = objList[j]->intersectWithRay(shadowRay, intersection, normal)) > 0)
+					{// else ambiant 
+						shadow = true; 
+					}
+				}
 
-				// specular reflection 
-				lightReflectionV = normal * 2 * dot_prod(normal, lightV) - lightV; // reflection vector 2(N dot L) N - L
-				viewV = cameraPos - intersection; // direction unit vector from the surface point to viewer  
-				viewV.normalize(); 
-				r += specularLight[0] * objList[i]->specularReflection[0] * pow(dot_prod(lightReflectionV, viewV), objList[i]->speN);
-				g += specularLight[1] * objList[i]->specularReflection[1] * pow(dot_prod(lightReflectionV, viewV), objList[i]->speN);
-				b += specularLight[2] * objList[i]->specularReflection[2] * pow(dot_prod(lightReflectionV, viewV), objList[i]->speN);
+				if (!shadow) {
+					// diffuse reflection
+					lightV = (lightPos - intersection); // direction unit vector from surface point to light source  
+					lightV.normalize();
+					r += diffusetLight[0] * objList[i]->diffusetReflection[0] * dot_prod(normal, lightV);
+					g += diffusetLight[1] * objList[i]->diffusetReflection[1] * dot_prod(normal, lightV);
+					b += diffusetLight[2] * objList[i]->diffusetReflection[2] * dot_prod(normal, lightV);
 
+					// specular reflection 
+					lightReflectionV = normal * 2 * dot_prod(normal, lightV) - lightV; // reflection vector 2(N dot L) N - L
+					viewV = cameraPos - intersection; // direction unit vector from the surface point to viewer  
+					viewV.normalize();
+					r += specularLight[0] * objList[i]->specularReflection[0] * pow(dot_prod(lightReflectionV, viewV), objList[i]->speN);
+					g += specularLight[1] * objList[i]->specularReflection[1] * pow(dot_prod(lightReflectionV, viewV), objList[i]->speN);
+					b += specularLight[2] * objList[i]->specularReflection[2] * pow(dot_prod(lightReflectionV, viewV), objList[i]->speN);
+				
+				}
+
+				rayReflectionV = normal * 2 * dot_prod(normal, -ray.dir) + ray.dir; // 2 (N dot (-i)) N + i
+				rayReflectionV.normalize();
+				newRay.start = intersection;
+				newRay.dir = rayReflectionV;
+
+				double reflectedR, reflectedG, reflectedB = 1.0;
+				rayTrace(newRay, reflectedR, reflectedG, reflectedB, i, level + 1);
+				r += reflectedR * objList[i]->specularReflection[0];
+				g += reflectedG * objList[i]->specularReflection[1];
+				b += reflectedB * objList[i]->specularReflection[2];
 			}
 		}
 	}
