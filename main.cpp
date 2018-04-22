@@ -147,7 +147,7 @@ void rayTrace(Ray ray, double& r, double& g, double& b, int fromObj = -1 ,int le
 	{
 		if ((t = objList[i]->intersectWithRay(ray, intersection, normal)) > 0)
 		{
-			r = g = b = 1.0; 			
+			//r = g = b = 1.0; 			
 			if ((t < mint) && (fromObj != i)) {
 				mint = t;
 				// Step 2 
@@ -157,6 +157,7 @@ void rayTrace(Ray ray, double& r, double& g, double& b, int fromObj = -1 ,int le
 
 				// Step 3
 				goBackGround = 0;
+
 			}
 		}
 	}
