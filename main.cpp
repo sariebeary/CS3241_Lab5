@@ -75,8 +75,49 @@ double Sphere::intersectWithRay(Ray r, Vector3& intersection, Vector3& normal)
 // return a -ve if there is no intersection. Otherwise, return the smallest postive value of t
 {
 
-	// Step 1
+	// Step 1 Light Ray Equation 
+	Vector3 d = r.dir; // direction vector of the ray 
+	Vector3 p = r.start; // origin of the ray
+	Vector3 c = center_; // center of sphere 
 
+	double alpha = dot_prod(d, d); 
+	double beta = dot_prod(d * 2.0, (p - c));
+	double gamma = (p - c).lengthsqr - pow(r_, 2); 
+	double det = pow(beta, 2) - (4 * alpha * gamma); // determinant
+	double t; 
+
+	// 2 roots 
+	if(det > 0) {
+		double t1 = (-beta + sqrt(det)) / (2 * alpha);
+		double t2 = (-beta - sqrt(det)) / (2 * alpha);
+		// smaller positive root gives the nearer intersection 
+		if (t1 > 0 && t2 > 0) {
+			if (t1 > t2) {
+				t = t2;
+			}
+			else {
+				t = t1; 
+			}
+		}
+		else if (t1 > 0) {
+			t = t1; 
+		}
+		else if (t2 > 0) {
+			t = t2; 
+		}
+		else {
+		// negative root behind ray origin (consider no interection) 
+			return -1; 
+		}
+		// intersection
+		intersection = p + (d * t);
+
+		// normal
+		normal = (intersection - c);
+		normal.normalize();
+	}
+	
+	// imaginary roots or 1 root(ray tangential to sphere so consider no intersection) 
 	return -1;
 }
 
